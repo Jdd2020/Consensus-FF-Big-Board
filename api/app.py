@@ -26,6 +26,9 @@ def get_adp():
         # Example manipulation (optional)
         df['rank'] = df.index + 1
 
+        # Get difference between ESPN APP and average ADP
+        df["ESPN_SAVINGS"]  = df["ESPN Half"] - df["Average"]
+
         # Convert to dict and ensure clean JSON
         data = df.to_dict(orient='records')
         
