@@ -82,11 +82,15 @@ const App: React.FC = () => {
     setSortConfig({ key, direction });
   };
 
-  const getSortIndicator = (columnName: string) => {
+  const getSortIndicator = (columnName: string): React.ReactNode => {
     if (!sortConfig || sortConfig.key !== columnName) {
-      return ' ↕️'; // Both arrows when not sorted
+      return <i className="fa-solid fa-sort sort-icon" aria-hidden="true" />;
     }
-    return sortConfig.direction === 'ascending' ? ' ↑' : ' ↓';
+    return sortConfig.direction === 'ascending' ? (
+      <i className="fa-solid fa-sort-up sort-icon" aria-hidden="true" />
+    ) : (
+      <i className="fa-solid fa-sort-down sort-icon" aria-hidden="true" />
+    );
   };
 
   const handleDraftPlayer = (originalIndex: number) => {
@@ -122,68 +126,133 @@ const App: React.FC = () => {
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Half PPR ADP Data</h1>
+    <div className="retro">
+      <h1>
+        <i className="fa-solid fa-terminal title-icon" aria-hidden="true"></i>
+        Half PPR ADP Data
+        <span className="caret" aria-hidden="true"></span>
+      </h1>
       {data.length === 0 ? (
         <p>No data found.</p>
       ) : (
         <>
           <style>
             {`
-              .fade-out {
-                opacity: 1;
-                transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+              :root {
+                --bg: #000807;
+                --panel: #03110b;
+                --grid: #092016;
+                --text: #b8ffb8; /* terminal green */
+                --muted: #84ff84;
+                --accent: #00ff66; /* neon terminal */
+                --accent2: #00ffaa; /* secondary */
+                --line: rgba(0,255,102,0.18);
+                --line-strong: rgba(0,255,102,0.35);
               }
-              .fade-out.fading {
-                opacity: 0;
-                transform: scale(0.95);
+
+              .retro {
+                min-height: 100vh;
+                padding: 2rem;
+                background:
+                  radial-gradient(1200px 800px at 20% -10%, rgba(0,255,170,0.06), transparent),
+                  radial-gradient(1000px 600px at 100% 10%, rgba(0,255,102,0.08), transparent),
+                  var(--bg);
+                color: var(--text);
+                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+                letter-spacing: 0.2px;
               }
-              .drafted-row {
-                background-color: #f0f0f0 !important;
+              .retro::before {
+                content: "";
+                position: fixed; inset: 0;
+                background: repeating-linear-gradient(180deg, rgba(0,255,102,0.035) 0px, rgba(0,255,102,0.035) 1px, transparent 2px, transparent 4px);
+                pointer-events: none;
+                mix-blend-mode: overlay;
               }
+
+              h1 {
+                margin: 0 0 1rem;
+                font-size: 1.4rem;
+                letter-spacing: 0.12em;
+                color: var(--muted);
+                text-shadow: 0 0 8px rgba(0,255,102,0.45), 0 0 16px rgba(0,255,170,0.25);
+                display: flex; align-items: center; gap: 10px;
+              }
+              .title-icon { color: var(--accent); filter: drop-shadow(0 0 8px rgba(0,255,102,0.6)); }
+              .caret { display: inline-block; width: 10px; height: 1.1em; margin-left: 6px; background: var(--accent); box-shadow: 0 0 10px rgba(0,255,102,0.8); animation: blink 1s steps(1, end) infinite; }
+              @keyframes blink { 50% { opacity: 0; } }
+
+              .retro-table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
+                background: linear-gradient(180deg, rgba(9,32,22,0.55), rgba(5,18,12,0.85));
+                 border: 1px solid var(--line-strong);
+                box-shadow: 0 0 0 2px rgba(0,255,102,0.08), 0 0 24px rgba(0,255,102,0.12), inset 0 0 24px rgba(0,255,102,0.08);
+                 border-radius: 8px;
+                 overflow: hidden;
+               }
+              .retro-table thead th {
+                position: sticky; top: 0;
+                background: linear-gradient(180deg, #042015, #041a12);
+                color: var(--muted);
+                border-bottom: 1px solid var(--line-strong);
+                padding: 10px 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.12em;
+                font-size: 0.78rem;
+              }
+              .th-drafted { text-align: center; font-weight: 700; }
+              .th-sortable { cursor: pointer; user-select: none; }
+              .th-sortable:hover { color: var(--accent); text-shadow: 0 0 8px rgba(0,255,102,0.6); }
+              .header-label { display: inline-flex; align-items: center; gap: 6px; }
+              .sort-icon { margin-left: 6px; color: var(--muted); opacity: 0.9; filter: drop-shadow(0 0 6px rgba(0,255,102,0.35)); }
+              .th-sortable:hover .sort-icon { color: var(--accent); opacity: 1; }
+
+              .retro-table tbody tr {
+                background: transparent;
+                transition: background 120ms ease, transform 120ms ease;
+              }
+              .retro-table tbody tr:hover { background: rgba(0,255,102,0.06); }
+              .retro-table tbody tr:nth-child(odd) { background: rgba(10,32,24,0.35); }
+
+              .retro-table td {
+                 padding: 10px 12px;
+                 border-bottom: 1px solid var(--line);
+                 color: var(--text);
+                 font-size: 0.95rem;
+               }
+               .checkbox-cell { text-align: center; }
+              input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); filter: drop-shadow(0 0 6px rgba(0,255,102,0.6)); }
+              .name-cell { font-weight: 700; color: #ceffce; text-shadow: 0 0 6px rgba(0,255,102,0.6); }
+
+               /* Draft/Fade animations */
+               .fade-out { opacity: 1; transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
+               .fade-out.fading { opacity: 0; transform: scale(0.95); }
+              .drafted-row { background-color: rgba(0,255,102,0.1) !important; color: #9bffc6; }
             `}
           </style>
-          <table border={1} cellPadding={8} cellSpacing={0} style={{ borderCollapse: 'collapse', width: '100%' }}>
+          <table className="retro-table">
             <thead>
               <tr>
-                <th style={{ 
-                  cursor: 'default',
-                  backgroundColor: '#f5f5f5',
-                  padding: '8px',
-                  textAlign: 'center'
-                }}>
-                  Drafted
-                </th>
-                {/* Name column first */}
-                {data[0] && 'Name' in data[0] && (
-                  <th 
+                <th className="th-drafted"><span className="header-label"><i className="fa-regular fa-square-check" aria-hidden="true"></i> Drafted</span></th>
+                 {/* Name column first */}
+                 {data[0] && 'Name' in data[0] && (
+                  <th
                     key="Name"
                     onClick={() => requestSort('Name')}
-                    style={{ 
-                      cursor: 'pointer', 
-                      backgroundColor: '#f5f5f5',
-                      userSelect: 'none',
-                      padding: '8px',
-                      textAlign: 'left'
-                    }}
+                    className="th-sortable"
                   >
-                    Name{getSortIndicator('Name')}
-                  </th>
-                )}
-                {/* All other columns except Name */}
+                    <span className="header-label"><i className="fa-solid fa-user" aria-hidden="true"></i> Name</span>{getSortIndicator('Name')}
+                   </th>
+                 )}
+                 {/* All other columns except Name */}
                 {Object.keys(data[0]).filter(key => key !== 'Name').map((key) => (
-                  <th 
+                  <th
                     key={key}
                     onClick={() => requestSort(key)}
-                    style={{ 
-                      cursor: 'pointer', 
-                      backgroundColor: '#f5f5f5',
-                      userSelect: 'none',
-                      padding: '8px',
-                      textAlign: 'left'
-                    }}
+                    className="th-sortable"
                   >
-                    {key}{getSortIndicator(key)}
+                    <span className="header-label">{key}</span>{getSortIndicator(key)}
                   </th>
                 ))}
               </tr>
@@ -201,9 +270,9 @@ const App: React.FC = () => {
                 return (
                   <tr 
                     key={originalIndex}
-                    className={`fade-out ${isFading ? 'fading' : ''} ${isDrafted ? 'drafted-row' : ''}`}
+                    className={"fade-out " + (isFading ? 'fading ' : '') + (isDrafted ? 'drafted-row' : '')}
                   >
-                    <td style={{ padding: '8px', textAlign: 'center' }}>
+                    <td className="checkbox-cell">
                       <input
                         type="checkbox"
                         checked={isDrafted || isFading}
@@ -214,11 +283,11 @@ const App: React.FC = () => {
                     </td>
                     {/* Name column first */}
                     {row.Name !== undefined && (
-                      <td key="Name" style={{ padding: '8px', fontWeight: 'bold' }}>{row.Name}</td>
+                      <td key="Name" className="name-cell">{row.Name}</td>
                     )}
                     {/* All other columns except Name */}
                     {Object.entries(row).filter(([key]) => key !== 'Name').map(([key, val], i) => (
-                      <td key={key} style={{ padding: '8px' }}>{val}</td>
+                      <td key={key}>{val}</td>
                     ))}
                   </tr>
                 );
@@ -229,6 +298,6 @@ const App: React.FC = () => {
       )}
     </div>
   );
-};
+}
 
 export default App;

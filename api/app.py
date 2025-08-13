@@ -11,6 +11,7 @@ CORS(app)
 @app.route('/adp', methods=['GET'])
 def get_adp():
     try:
+        
         # Construct the path to the CSV
         csv_path = os.path.join(os.path.dirname(__file__), 'data', 'half_ppr_adp.csv')
 
